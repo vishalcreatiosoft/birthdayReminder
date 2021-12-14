@@ -13,8 +13,8 @@ const JWT_SECRET = 'helloworld'
 const today  = new Date();
 const dd = today.getDate();
 const mm = today.getMonth() + 1;
-date = `${mm}-${dd}`;
-console.log(date);
+const date = `${mm}-${dd}`;
+
 
 
 
@@ -148,15 +148,24 @@ const job = schedule.scheduleJob('*/08 */18 * * *', function(){
   
 });
 
-// router.get('/api/auth/birthdate',(req, res)=>{
-//     try{
+router.get('/api/auth/birthdate', async(req, res)=>{
+    try{
 
-//         const dobList = await find({dob : })
+        console.log(Employee.aggregate([
+            {
+                $details : {
+                    year : {
+                        $year : "$dom"
+                    }
+                }
+            }
+        ]))
+        
 
-//     }catch(e){
-//         console.log(e.message);
-//         res.status(400).send('Internal Server Error');
-//     }
-// })
+    }catch(e){
+        console.log(e.message);
+        res.status(400).send('Internal Server Error');
+    }
+})
 
 module.exports = router;
