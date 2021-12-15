@@ -6,6 +6,8 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import UserState from "./context/users/UserState";
 import AddEmployee from "./components/AddEmployee";
+import Notifications from "./components/Notifications";
+
 
 function App() {
   return (
@@ -13,10 +15,12 @@ function App() {
       <UserState>
       <Router>
         <Navbar />
+        
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/about" element={<About />} />
           <Route exact path="/addemployee" element={<AddEmployee />} />
+          <Route exact path="/notifications" element={<Notifications />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/signup" element={<Signup />} />
         </Routes> 

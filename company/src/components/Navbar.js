@@ -1,12 +1,23 @@
-import React from 'react'
-import { Link, useNavigate} from 'react-router-dom'
+import React ,{useContext} from 'react'
+import { Link, useNavigate} from 'react-router-dom';
+import userContext from '../context/users/userContext';
 
 const Navbar = () => {
     const navigate = useNavigate();
+    const context = useContext(userContext);
+    const {getname, name} = context;
     const handleLogout = ()=>{
         localStorage.removeItem('token');
         navigate('/login');
     }
+
+    const handleBirthday = (e) => {
+        e.preventDefault();
+        getname();
+        
+    }
+
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container-fluid">
@@ -25,6 +36,9 @@ const Navbar = () => {
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link active" to="/addemployee">AddEmployee</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link active" to="/notifications" onClick={handleBirthday}>Notifications</Link>
                         </li>
                   
                     </ul> :<ul className="navbar-nav me-auto mb-2 mb-lg-0">
