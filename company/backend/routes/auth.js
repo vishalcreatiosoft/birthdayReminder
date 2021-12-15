@@ -141,37 +141,36 @@ router.post('/api/auth/addemployee', [
     }
 )
 
-router.get('/api/auth/employee/birthday', (req, res) => {
+router.get('/api/auth/employee/birthday', async(req, res) => {
 
     try {
         let nameArray = [];
-        schedule.scheduleJob('*/00 */29 */18 * * *', async () => {
+        
+        const birthday = async (id) => {
+            const birthdayPerson = await Employee.find({ _id: id })
+            //console.log(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname} has birthday today`);
+            nameArray.push(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname}`);
 
-            const birthday = async (id) => {
-                const birthdayPerson = await Employee.find({ _id: id })
-                console.log(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname} has birthday today`);
-                nameArray.push(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname}`);
+        }
+
+        const data = await Employee.aggregate([
+            {
+                $project: {
+                    month: { $month: "$dob" },
+                    date: { $dayOfMonth: "$dob" }
+                }
             }
-
-            const data = await Employee.aggregate([
-                {
-                    $project: {
-                        month: { $month: "$dob" },
-                        date: { $dayOfMonth: "$dob" }
-                    }
-                }
-            ])
-            data.forEach(element => {
-                if (`${element.date}/${element.month}` == date) {
-                    birthday(element._id);
-                }
-            });
+        ])
+        data.forEach(element => {
+            if (`${element.date}/${element.month}` == date) {
+                birthday(element._id);
+            }
         });
 
-        setTimeout(() => {
+        schedule.scheduleJob('*/2 */19 * * *', () => { 
+            console.log(nameArray);
             res.status(200).json(nameArray);
-        }, 5000)
-
+        }); 
 
     } catch (e) {
         console.log(e.message);
@@ -182,7 +181,7 @@ router.get('/api/auth/employee/birthday', (req, res) => {
 
 
 router.get('/api/auth/sendemail', (req, res) => {
-    
+
 
     // async..await is not allowed in global scope, must use a wrapper
     async function main() {
@@ -209,9 +208,9 @@ router.get('/api/auth/sendemail', (req, res) => {
             html: "<b>Hello world?</b>", // html body
         });
 
-        if(info.messageId){
+        if (info.messageId) {
             res.send('Email sent');
-        }else{
+        } else {
             res.send('Error with sending email')
         }
         console.log("Message sent: %s", info.messageId);
@@ -223,7 +222,7 @@ router.get('/api/auth/sendemail', (req, res) => {
     }
 
     main().catch(console.error);
-    
+
 })
 
 
