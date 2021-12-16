@@ -15,7 +15,7 @@ const Home = () => {
 
     return (
         <div className='container my-3'>
-            Welcome to Home page.
+            Welcome To Company
         </div>
     )
 }

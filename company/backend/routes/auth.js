@@ -19,6 +19,35 @@ const date = `${dd}/${mm}`;
 let nameArray = [];
 
 
+//function to getNames of the employees who have birthday at given date
+const getNames = async(names,searchDate)=>{
+
+    const searchName = async (id) => {
+        const birthdayPerson = await Employee.find({ _id: id })
+        //console.log(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname}`);
+        names.push(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname}`);
+        console.log(names);
+    }
+    const data = await Employee.aggregate([
+        {
+            $project: {
+                year: { $year: "$dob" },
+                month: { $month: "$dob" },
+                date: { $dayOfMonth: "$dob" }
+            }
+        }
+    ])
+
+    data.forEach(element => {
+        if (`${element.year}-${element.month}-${element.date}` == searchDate) {
+            searchName(element._id);
+            
+        }
+    });
+
+    
+}
+
 
 //Route 1 - for user signup  using - /api/auth/signup.
 router.post('/api/auth/signup', [
@@ -142,10 +171,10 @@ router.post('/api/auth/addemployee', [
     }
 )
 
-
-schedule.scheduleJob('29 12 * * *', async() => {
+// scheduler1 : To fetch the name of the Today's Birthday Persons at given time.
+schedule.scheduleJob('41 16 * * *', async () => {
     try {
-        
+
         const birthday = async (id) => {
             const birthdayPerson = await Employee.find({ _id: id })
             //console.log(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname} has birthday today`);
@@ -163,19 +192,19 @@ schedule.scheduleJob('29 12 * * *', async() => {
         ])
 
         data.forEach(element => {
-            if(`${element.date}/${element.month}` == date) {
+            if (`${element.date}/${element.month}` == date) {
                 birthday(element._id);
             }
         });
-   
+
     } catch (e) {
         console.log(e.message);
         res.status(500).send('Internal Server Error');
     }
 })
 
-
-schedule.scheduleJob('30 12 * * *', () => {
+// scheduler2 : To send the email to Today's Birthday List of Employees at given time.
+schedule.scheduleJob('00 10 * * *', () => {
 
     let transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -193,7 +222,7 @@ schedule.scheduleJob('30 12 * * *', () => {
     }
 
     transporter.sendMail(mailOptions, (err, data) => {
-        if (err) {   
+        if (err) {
             cosole.log('Error Occurs', err);
         } else {
             console.log('Email Sent')
@@ -202,7 +231,24 @@ schedule.scheduleJob('30 12 * * *', () => {
 
 });
 
+//Route-4: To get the name of BirthDay list of peoples for notification page using - /api/auth/employee/birthday
+router.post('/api/auth/employee/birthday', async (req, res) => {
 
+    try {
+        let names = [];
+        let count = 0
+        const searchDate = req.body.dob;
+
+        const birthdayNames = await getNames(names,searchDate);
+
+       // console.log(birthdayNames);
+
+    } catch (e) {
+        console.log(e.message);
+        res.status(500).send('Internal server error');
+    }
+
+})
 
 
 

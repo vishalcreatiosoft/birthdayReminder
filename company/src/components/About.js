@@ -7,7 +7,7 @@ const About = () => {
     
     return (
         <div className='container my-3'>
-            this is about page 
+            About page 
         </div>
     )
 }

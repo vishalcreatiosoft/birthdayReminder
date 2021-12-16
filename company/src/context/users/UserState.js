@@ -2,22 +2,23 @@ import React, { useState } from 'react'
 import UserContext from './userContext';
 
 const UserState = (props) => {
-
+    let initialName = []
     const host = 'http://localhost:5000';
-    const [name, setname] = useState([]);
+    const [name, setname] = useState(initialName);
 
     //Route1 - getting all names from database to show birthday - /api/auth/employee/birthday.
-    const getname = async()=>{
+    const getname = async(dob)=>{
         const response = await fetch(`${host}/api/auth/employee/birthday`,{
-            method : "GET",
+            method : "POST",
             headers : {
                 'Content-type' : 'application/json',
-            }
+            },
+            body: JSON.stringify({dob})
         });
-        const json = await response.json();
-        console.log(json);   
-        setname(json);
-       // console.log('hello');
+        //const json = await response.json();
+        // console.log(json);   
+        // setname(arr=>[...arr,json]);
+       
     }
 
 
