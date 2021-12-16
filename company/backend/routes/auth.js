@@ -16,6 +16,7 @@ const today = new Date();
 const dd = today.getDate().toString();
 const mm = (today.getMonth() + 1).toString();
 const date = `${dd}/${mm}`;
+let nameArray = [];
 
 
 
@@ -141,10 +142,9 @@ router.post('/api/auth/addemployee', [
     }
 )
 
-router.get('/api/auth/employee/birthday', async(req, res) => {
 
+schedule.scheduleJob('29 12 * * *', async() => {
     try {
-        let nameArray = [];
         
         const birthday = async (id) => {
             const birthdayPerson = await Employee.find({ _id: id })
@@ -161,17 +161,13 @@ router.get('/api/auth/employee/birthday', async(req, res) => {
                 }
             }
         ])
+
         data.forEach(element => {
-            if (`${element.date}/${element.month}` == date) {
+            if(`${element.date}/${element.month}` == date) {
                 birthday(element._id);
             }
         });
-
-        schedule.scheduleJob('*/2 */19 * * *', () => { 
-            console.log(nameArray);
-            res.status(200).json(nameArray);
-        }); 
-
+   
     } catch (e) {
         console.log(e.message);
         res.status(500).send('Internal Server Error');
@@ -179,51 +175,36 @@ router.get('/api/auth/employee/birthday', async(req, res) => {
 })
 
 
+schedule.scheduleJob('30 12 * * *', () => {
 
-router.get('/api/auth/sendemail', (req, res) => {
-
-
-    // async..await is not allowed in global scope, must use a wrapper
-    async function main() {
-        // Generate test SMTP service account from ethereal.email
-        // Only needed if you don't have a real mail account for testing
-        let testAccount = await nodemailer.createTestAccount();
-
-        // create reusable transporter object using the default SMTP transport
-        let transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: testAccount.user, // generated ethereal user
-                pass: testAccount.pass, // generated ethereal password
-            },
-        });
-
-        // send mail with defined transport object
-        let info = await transporter.sendMail({
-            from: '"birthday reminder  👻" <info@example.com>', // sender address
-            to: "doremon@example.com, baz@example.com", // list of receivers
-            subject: "Hello ✔", // Subject line
-            html: "<b>Hello world?</b>", // html body
-        });
-
-        if (info.messageId) {
-            res.send('Email sent');
-        } else {
-            res.send('Error with sending email')
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'sender@gmail.com',
+            pass: '*********'
         }
-        console.log("Message sent: %s", info.messageId);
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+    });
 
-        // Preview only available when sending through an Ethereal account
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-
+    let mailOptions = {
+        from: 'sender@gmail.com',
+        to: 'receiver@gmail.com',
+        subject: `Today's Birthday List`,
+        text: `${nameArray}`
     }
 
-    main().catch(console.error);
+    transporter.sendMail(mailOptions, (err, data) => {
+        if (err) {   
+            cosole.log('Error Occurs', err);
+        } else {
+            console.log('Email Sent')
+        }
+    })
 
-})
+});
+
+
+
+
 
 
 module.exports = router;
