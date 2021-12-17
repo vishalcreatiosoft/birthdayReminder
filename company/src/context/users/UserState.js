@@ -15,9 +15,8 @@ const UserState = (props) => {
             },
             body: JSON.stringify({dob})
         });
-        //const json = await response.json();
-        // console.log(json);   
-        // setname(arr=>[...arr,json]);
+        const json = await response.json(); 
+        setname(json);
        
     }
 

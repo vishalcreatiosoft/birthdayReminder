@@ -1,19 +1,22 @@
 import React, {useContext, useState} from 'react';
 import userContext from '../context/users/userContext'
-//import BirthdayCard from './BirthdayCard';
+import BirthdayCard from './BirthdayCard';
 
 const BirthdayList = () => {
-    
+    let i = 0
     const context = useContext(userContext);
-    const {getname} = context;
+    const {getname, name} = context;
 
     const [date, setdate] = useState({dob : "dd/mm/yyyy"})
     
     const handleSubmit = (e)=>{
         e.preventDefault();
-        //console.log('handle submit clicked');
-        getname(date.dob);
-        
+        if(date.dob === "dd/mm/yyyy")
+        {
+            alert('Please Select Date')
+        }else{
+            getname(date.dob);
+        } 
     }
 
     const onChange = (e)=>{
@@ -35,9 +38,9 @@ const BirthdayList = () => {
                 </div>
             </form>
 
-            {/* {name && name.map((person=>{
+            {name.map((person=>{
                 return <BirthdayCard key={i++} person={person} />
-            }))} */}
+            }))}
 
         </div>
     )

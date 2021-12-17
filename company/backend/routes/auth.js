@@ -6,7 +6,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator')
 const schedule = require('node-schedule');
-const { find } = require('../models/user-model');
 const nodemailer = require("nodemailer");
 
 const JWT_SECRET = 'helloworld'
@@ -19,34 +18,6 @@ const date = `${dd}/${mm}`;
 let nameArray = [];
 
 
-//function to getNames of the employees who have birthday at given date
-const getNames = async(names,searchDate)=>{
-
-    const searchName = async (id) => {
-        const birthdayPerson = await Employee.find({ _id: id })
-        //console.log(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname}`);
-        names.push(`${birthdayPerson[0].firstname} ${birthdayPerson[0].lastname}`);
-        console.log(names);
-    }
-    const data = await Employee.aggregate([
-        {
-            $project: {
-                year: { $year: "$dob" },
-                month: { $month: "$dob" },
-                date: { $dayOfMonth: "$dob" }
-            }
-        }
-    ])
-
-    data.forEach(element => {
-        if (`${element.year}-${element.month}-${element.date}` == searchDate) {
-            searchName(element._id);
-            
-        }
-    });
-
-    
-}
 
 
 //Route 1 - for user signup  using - /api/auth/signup.
@@ -172,7 +143,7 @@ router.post('/api/auth/addemployee', [
 )
 
 // scheduler1 : To fetch the name of the Today's Birthday Persons at given time.
-schedule.scheduleJob('41 16 * * *', async () => {
+schedule.scheduleJob('50 59 9 * * *', async () => {
     try {
 
         const birthday = async (id) => {
@@ -210,7 +181,7 @@ schedule.scheduleJob('00 10 * * *', () => {
         service: 'gmail',
         auth: {
             user: 'sender@gmail.com',
-            pass: '*********'
+            pass: '*******'
         }
     });
 
@@ -218,7 +189,7 @@ schedule.scheduleJob('00 10 * * *', () => {
         from: 'sender@gmail.com',
         to: 'receiver@gmail.com',
         subject: `Today's Birthday List`,
-        text: `${nameArray}`
+        html: `<b>${nameArray}</b>`
     }
 
     transporter.sendMail(mailOptions, (err, data) => {
@@ -239,9 +210,51 @@ router.post('/api/auth/employee/birthday', async (req, res) => {
         let count = 0
         const searchDate = req.body.dob;
 
-        const birthdayNames = await getNames(names,searchDate);
+        const addZero = (num)=>{
+            return num<10 ? `0${num}` : num;
+        }
 
-       // console.log(birthdayNames);
+        const data = await Employee.aggregate([
+            {
+                $project: {
+                    year: { $year: "$dob" },
+                    month: { $month: "$dob" },
+                    date: { $dayOfMonth: "$dob" }
+                }
+            }
+        ])
+
+        const getMatchedDocuments = ()=>{
+            return data.filter((element)=>{
+                if(`${element.year}-${addZero(element.month)}-${addZero(element.date)}` === searchDate){
+                    return true          
+                }
+            })
+        }
+
+        const getNames = async(id)=>{
+            const employees = await Employee.find({_id : id});
+            employees.map((element)=>{
+                names.push(`${element.firstname} ${element.lastname}`);
+                count++;
+            })
+            if(count === matchedDocuments.length){
+                res.status(200).json(names);
+            }
+        }
+
+        const matchedDocuments = await getMatchedDocuments(searchDate);
+        
+        if(matchedDocuments.length > 0){
+            for(let i = 0; i<matchedDocuments.length; i++){
+                getNames(matchedDocuments[i]._id);
+            }
+        }else{
+            names.push('No Employees have birthday on this date.')
+            res.json(names);
+        }
+
+        
 
     } catch (e) {
         console.log(e.message);

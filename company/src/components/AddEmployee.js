@@ -16,7 +16,7 @@ const AddEmployee = () => {
               body: JSON.stringify({firstname : firstname, lastname : lastname, email : email, city : city, dob : dob})
         });
         const json = await response.json();
-        console.log(json);
+        //console.log(json);
 
         if(json.success){
             setdetails({firstname: "", lastname: "", email: "", city: "", dob : "dd/mm/yyyy"});
